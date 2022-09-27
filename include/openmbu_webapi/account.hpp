@@ -14,32 +14,28 @@
 
 namespace OpenMBUWebAPI
 {
-    enum class MBUAuthStatus
+    enum class Status
     {
-        MBU_AUTH_SUCCESS = 0,
-        MBU_AUTH_FAILURE,
-        MBU_AUTH_ERROR,
-        MBU_AUTH_UNKNOWN,
+        STATUS_SUCCESS = 0,
+        STATUS_FAILURE,
+        STATUS_ERROR,
+        STATUS_UNKNOWN,
     };
 
-    class MBUAUTH_EXPORT MBUAccount
+    class MBUAUTH_EXPORT Account
     {
     public:
-        MBUAccount();
+        Account();
+        ~Account();
 
-        ~MBUAccount();
-
-        MBUAuthStatus Login(const std::string &username, const std::string &password, std::string *statusMsg = nullptr);
-
-        MBUAuthStatus CheckSession(std::string *statusMsg = nullptr);
-
-        MBUAuthStatus Logout(std::string *statusMsg = nullptr);
+        Status Login(const std::string &username, const std::string &password, std::string *statusMsg = nullptr);
+        Status CheckSession(std::string *statusMsg = nullptr);
+        Status Logout(std::string *statusMsg = nullptr);
 
         const std::string &GetUsername() const { return mUsername; }
-
         const std::string &GetDisplayName() const { return mDisplayName; }
-
         const std::string &GetGameToken() const { return mGameToken; }
+        const bool &IsLoggedIn() const { return mIsLoggedIn; }
 
     private:
         std::string mUsername;

@@ -3,4 +3,4 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
-extern bool postJSON(nlohmann::json jsonRequest, const std::string &url, nlohmann::json *jsonResponse);
+extern bool postJSON(const nlohmann::json &jsonRequest, const std::string &url, nlohmann::json *jsonResponse);

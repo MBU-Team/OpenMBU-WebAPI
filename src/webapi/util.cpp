@@ -7,7 +7,7 @@ static size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *use
     return size * nmemb;
 }
 
-bool postJSON(nlohmann::json jsonRequest, const std::string &url, nlohmann::json *jsonResponse)
+bool postJSON(const nlohmann::json &jsonRequest, const std::string &url, nlohmann::json *jsonResponse)
 {
     CURL *curl;
     CURLcode res;
@@ -18,7 +18,7 @@ bool postJSON(nlohmann::json jsonRequest, const std::string &url, nlohmann::json
 
         std::string readBuffer;
 
-        struct curl_slist *headers = NULL;
+        struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
