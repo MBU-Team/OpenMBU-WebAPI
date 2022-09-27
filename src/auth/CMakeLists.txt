@@ -26,9 +26,9 @@ target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/libs/libcurl/
 target_compile_definitions(${PROJECT_NAME} PRIVATE CURL_STATICLIB)
 
 if (CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
-    target_link_libraries(${PROJECT_NAME} PUBLIC libcurl_a_x64.lib)
+    target_link_libraries(${PROJECT_NAME} PUBLIC libcurl_a_x64.lib ws2_32.lib crypt32.lib Wldap32.Lib Normaliz.lib)
 else()
-    target_link_libraries(${PROJECT_NAME} PUBLIC libcurl_a_x86.lib)
+    target_link_libraries(${PROJECT_NAME} PUBLIC libcurl_a_x86.lib ws2_32.lib crypt32.lib Wldap32.lib Normaliz.lib)
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${ProjectOutDir}")
