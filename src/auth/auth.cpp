@@ -1,137 +1,28 @@
 #include "mbu_auth/auth.hpp"
 
-#include <iostream>
+#include "util.hpp"
 #include <nlohmann/json.hpp>
-#include <curl/curl.h>
 
-size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
+bool login(std::string username, std::string password, nlohmann::json *json)
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+    nlohmann::json jsonRequest;
+    jsonRequest["user_name"] = username;
+    jsonRequest["user_password"] = password;
+    return postJSON(jsonRequest, "https://api.openmbu.com/login.php", json);
 }
 
-bool login(std::string username, std::string password, nlohmann::json* json)
+bool check_session(std::string gameToken, nlohmann::json *json)
 {
-    CURL* curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl)
-    {
-        nlohmann::json jsonRequest;
-        jsonRequest["user_name"] = username;
-        jsonRequest["user_password"] = password;
-        std::string jsonstr = jsonRequest.dump();
-
-        std::string readBuffer;
-
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openmbu.com/login.php");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        if (res == CURLE_OK)
-        {
-            nlohmann::json jsonResponse = nlohmann::json::parse(readBuffer);
-            *json = jsonResponse;
-            //std::cout << jsonResponse.dump(4) << std::endl;
-        } else {
-            std::cout << "Failed to connect to OpenMBU API" << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
+    nlohmann::json jsonRequest;
+    jsonRequest["game_token"] = gameToken;
+    return postJSON(jsonRequest, "https://api.openmbu.com/check_session.php", json);
 }
 
-bool check_session(std::string gameToken, nlohmann::json* json)
+bool logout(std::string gameToken, nlohmann::json *json)
 {
-    CURL* curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl)
-    {
-        nlohmann::json jsonRequest;
-        jsonRequest["game_token"] = gameToken;
-        std::string jsonstr = jsonRequest.dump();
-
-        std::string readBuffer;
-
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openmbu.com/check_session.php");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        if (res == CURLE_OK)
-        {
-            nlohmann::json jsonResponse = nlohmann::json::parse(readBuffer);
-            *json = jsonResponse;
-            //std::cout << jsonResponse.dump(4) << std::endl;
-        } else {
-            std::cout << "Failed to connect to OpenMBU API" << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool logout(std::string gameToken, nlohmann::json* json)
-{
-    CURL* curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl)
-    {
-        nlohmann::json jsonRequest;
-        jsonRequest["game_token"] = gameToken;
-        std::string jsonstr = jsonRequest.dump();
-
-        std::string readBuffer;
-
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openmbu.com/logout.php");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        if (res == CURLE_OK)
-        {
-            nlohmann::json jsonResponse = nlohmann::json::parse(readBuffer);
-            *json = jsonResponse;
-            //std::cout << jsonResponse.dump(4) << std::endl;
-        } else {
-            std::cout << "Failed to connect to OpenMBU API" << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
+    nlohmann::json jsonRequest;
+    jsonRequest["game_token"] = gameToken;
+    return postJSON(jsonRequest, "https://api.openmbu.com/logout.php", json);
 }
 
 MBUAccount::MBUAccount()

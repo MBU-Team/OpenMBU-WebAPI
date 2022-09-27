@@ -10,9 +10,10 @@ target_sources(${PROJECT_NAME}
     PRIVATE
     # Sources
     auth.cpp
+    util.cpp
 
     # Headers
-    #auth.hpp
+    util.hpp
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC MBUAUTH_DLL)
