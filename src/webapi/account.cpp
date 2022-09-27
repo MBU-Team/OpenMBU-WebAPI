@@ -5,28 +5,6 @@
 
 using namespace OpenMBUWebAPI;
 
-bool login(std::string username, std::string password, nlohmann::json *json)
-{
-    nlohmann::json jsonRequest;
-    jsonRequest["user_name"] = username;
-    jsonRequest["user_password"] = password;
-    return postJSON(jsonRequest, "https://api.openmbu.com/login.php", json);
-}
-
-bool check_session(std::string gameToken, nlohmann::json *json)
-{
-    nlohmann::json jsonRequest;
-    jsonRequest["game_token"] = gameToken;
-    return postJSON(jsonRequest, "https://api.openmbu.com/check_session.php", json);
-}
-
-bool logout(std::string gameToken, nlohmann::json *json)
-{
-    nlohmann::json jsonRequest;
-    jsonRequest["game_token"] = gameToken;
-    return postJSON(jsonRequest, "https://api.openmbu.com/logout.php", json);
-}
-
 MBUAccount::MBUAccount()
 {
     this->mUsername = "";
@@ -50,7 +28,17 @@ MBUAuthStatus MBUAccount::Login(const std::string& username, const std::string& 
     }
 
     nlohmann::json login_response {};
-    ::login(username, password, &login_response);
+
+    nlohmann::json jsonRequest;
+    jsonRequest["user_name"] = username;
+    jsonRequest["user_password"] = password;
+    if (!postJSON(jsonRequest, "https://api.openmbu.com/login.php", &login_response))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Failed to connect to server";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
     if (!login_response.contains("msg") || !login_response.contains("status"))
     {
         if (statusMsg != nullptr)
@@ -101,7 +89,15 @@ MBUAuthStatus MBUAccount::CheckSession(std::string *statusMsg)
     }
 
     nlohmann::json check_session_response {};
-    ::check_session(this->mGameToken, &check_session_response);
+    nlohmann::json jsonRequest;
+    jsonRequest["game_token"] = this->mGameToken;
+    if(!postJSON(jsonRequest, "https://api.openmbu.com/check_session.php", &check_session_response))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Failed to connect to server";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
     if (!check_session_response.contains("msg") || !check_session_response.contains("status"))
     {
         if (statusMsg != nullptr)
@@ -146,7 +142,15 @@ MBUAuthStatus MBUAccount::Logout(std::string *statusMsg)
     }
 
     nlohmann::json logout_response {};
-    ::logout(this->mGameToken, &logout_response);
+    nlohmann::json jsonRequest;
+    jsonRequest["game_token"] = this->mGameToken;
+    if(!postJSON(jsonRequest, "https://api.openmbu.com/logout.php", &logout_response))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Failed to connect to server";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
     if (!logout_response.contains("msg") || !logout_response.contains("status"))
     {
         if (statusMsg != nullptr)
