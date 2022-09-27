@@ -1,52 +1,8 @@
-#include "auth.hpp"
-#include "mbu_auth.h"
+#include "mbu_auth/auth.hpp"
 
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
-
-//void test()
-//{
-//    CURL* curl;
-//    CURLcode res;
-//    curl = curl_easy_init();
-//    if (curl)
-//    {
-//        std::string jsonstr = "{\"user_name\": \"test\", \"password\": \"potato\"}";
-//
-//        //std::string jsonstr = "user_name=test&user_password=potato";
-//
-//        struct curl_slist *headers = NULL;
-//        //headers = curl_slist_append(headers, "Accept: application/json");
-//        //headers = curl_slist_append(headers, "Content-Type: multipart/form-data");
-//        //headers = curl_slist_append(headers, "Expect:");
-//        headers = curl_slist_append(headers, "Content-Type: application/json");
-//        //headers = curl_slist_append(headers, "charset: utf-8");
-//
-//        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openmbu.com/login.php");
-//        //curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-//        //curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.38.0");
-//        //curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
-//        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-//        //const char* data = curl_easy_escape(curl, jsonstr.c_str(), jsonstr.length());
-//        //curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-//        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr.c_str());
-//        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
-//        //curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-//        //curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-//        //curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-//        //curl_easy_setopt(curl, CURLOPT_POST, 1L);
-//        //curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");
-//        //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-//
-//        res = curl_easy_perform(curl);
-//        if (res != CURLE_OK)
-//            std::cout << "Failed to connect to OpenMBU API" << std::endl;
-//        curl_easy_cleanup(curl);
-//    }
-//}
-
-//typedef void (*jsonCallback)(nlohmann::json json);
 
 size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -178,45 +134,149 @@ bool logout(std::string gameToken, nlohmann::json* json)
     return false;
 }
 
-void test()
+MBUAccount::MBUAccount()
 {
+    this->mUsername = "";
+    this->mDisplayName = "";
+    this->mGameToken = "";
+    this->mIsLoggedIn = false;
+}
+
+MBUAccount::~MBUAccount()
+{
+
+}
+
+MBUAuthStatus MBUAccount::Login(const std::string& username, const std::string& password, std::string* statusMsg)
+{
+    if (this->mIsLoggedIn)
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Already logged in";
+        return MBUAuthStatus::MBU_AUTH_SUCCESS;
+    }
+
     nlohmann::json login_response {};
-    login("tester", "tester", &login_response);
-    std::string msg1 = login_response["msg"];
-    std::string status1 = login_response["status"];
-    std::string displayName1 = "N/A";
-    if (login_response.contains("game_display_name"))
-        displayName1 = login_response["game_display_name"];
-    std::string token1 = "N/A";
-    if (login_response.contains("game_display_name"))
-        token1 = login_response["game_token"];
-    std::cout << "=== LOGIN ===" << std::endl;
-    std::cout << "Msg: " << msg1 << std::endl;
-    std::cout << "Status: " << status1 << std::endl;
-    std::cout << "Display Name: " << displayName1 << std::endl;
-    std::cout << "Token: " << token1 << std::endl;
+    ::login(username, password, &login_response);
+    if (!login_response.contains("msg") || !login_response.contains("status"))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Invalid response from OpenMBU API (No Data)";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
 
-    std::cout << std::endl;
+    MBUAuthStatus ret = MBUAuthStatus::MBU_AUTH_UNKNOWN;
 
-    nlohmann::json session_response {};
-    check_session(token1, &session_response);
-    std::string msg2 = session_response["msg"];
-    std::string status2 = session_response["status"];
-    std::string displayName2 = "N/A";
-    if (session_response.contains("game_display_name"))
-        displayName2 = session_response["game_display_name"];
-    std::cout << "=== CHECK SESSION ===" << std::endl;
-    std::cout << "Msg: " << msg2 << std::endl;
-    std::cout << "Status: " << status2 << std::endl;
-    std::cout << "Display Name: " << displayName2 << std::endl;
+    std::string status = login_response["status"];
+    if (status == "success")
+        ret = MBUAuthStatus::MBU_AUTH_SUCCESS;
+    else if (status == "error")
+        ret = MBUAuthStatus::MBU_AUTH_ERROR;
+    else if (status == "fail")
+        ret = MBUAuthStatus::MBU_AUTH_FAILURE;
 
-    std::cout << std::endl;
+    if (login_response.contains("msg"))
+        *statusMsg = login_response["msg"];
+    else
+        *statusMsg = "";
+
+    if (ret == MBUAuthStatus::MBU_AUTH_FAILURE || ret == MBUAuthStatus::MBU_AUTH_ERROR || ret == MBUAuthStatus::MBU_AUTH_UNKNOWN)
+        return ret;
+
+    if (!login_response.contains("game_token") || !login_response.contains("game_display_name"))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Invalid response from OpenMBU API (Missing Information)";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
+    this->mUsername = username;
+    this->mGameToken = login_response["game_token"];
+    this->mDisplayName = login_response["game_display_name"];
+    this->mIsLoggedIn = true;
+
+    return ret;
+}
+
+MBUAuthStatus MBUAccount::CheckSession(std::string *statusMsg)
+{
+    if (!mIsLoggedIn)
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Not logged in";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
+    nlohmann::json check_session_response {};
+    ::check_session(this->mGameToken, &check_session_response);
+    if (!check_session_response.contains("msg") || !check_session_response.contains("status"))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Invalid response from OpenMBU API (No Data)";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
+    MBUAuthStatus ret = MBUAuthStatus::MBU_AUTH_UNKNOWN;
+
+    std::string status = check_session_response["status"];
+    if (status == "success")
+        ret = MBUAuthStatus::MBU_AUTH_SUCCESS;
+    else if (status == "error")
+        ret = MBUAuthStatus::MBU_AUTH_ERROR;
+    else if (status == "fail")
+        ret = MBUAuthStatus::MBU_AUTH_FAILURE;
+
+    if (check_session_response.contains("msg"))
+        *statusMsg = check_session_response["msg"];
+    else
+        *statusMsg = "";
+
+    if (ret == MBUAuthStatus::MBU_AUTH_FAILURE || ret == MBUAuthStatus::MBU_AUTH_ERROR || ret == MBUAuthStatus::MBU_AUTH_UNKNOWN)
+    {
+        mIsLoggedIn = false;
+        return ret;
+    }
+
+    if (check_session_response.contains("game_display_name"))
+        this->mDisplayName = check_session_response["game_display_name"];
+
+    return ret;
+}
+
+MBUAuthStatus MBUAccount::Logout(std::string *statusMsg)
+{
+    if (!mIsLoggedIn)
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Not logged in";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
 
     nlohmann::json logout_response {};
-    logout(token1, &logout_response);
-    std::string msg3 = logout_response["msg"];
-    std::string status3 = logout_response["status"];
-    std::cout << "=== LOGOUT ===" << std::endl;
-    std::cout << "Msg: " << msg3 << std::endl;
-    std::cout << "Status: " << status3 << std::endl;
+    ::logout(this->mGameToken, &logout_response);
+    if (!logout_response.contains("msg") || !logout_response.contains("status"))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Invalid response from OpenMBU API (No Data)";
+        return MBUAuthStatus::MBU_AUTH_ERROR;
+    }
+
+    MBUAuthStatus ret = MBUAuthStatus::MBU_AUTH_UNKNOWN;
+
+    std::string status = logout_response["status"];
+    if (status == "success")
+        ret = MBUAuthStatus::MBU_AUTH_SUCCESS;
+    else if (status == "error")
+        ret = MBUAuthStatus::MBU_AUTH_ERROR;
+    else if (status == "fail")
+        ret = MBUAuthStatus::MBU_AUTH_FAILURE;
+
+    if (logout_response.contains("msg"))
+        *statusMsg = logout_response["msg"];
+    else
+        *statusMsg = "";
+
+    mIsLoggedIn = false;
+
+    return ret;
 }
