@@ -1,6 +1,8 @@
 #include "util.hpp"
 #include <curl/curl.h>
 
+using namespace OpenMBUWebAPI;
+
 static size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
     ((std::string *) userp)->append((char *) contents, size * nmemb);
@@ -43,4 +45,41 @@ bool postJSON(const nlohmann::json &jsonRequest, const std::string &url, nlohman
     }
 
     return false;
+}
+
+OpenMBUWebAPI::Status postJSONAndValidate(const nlohmann::json &jsonRequest, const std::string &url, nlohmann::json *jsonResponse, std::string* statusMsg)
+{
+    if (!postJSON(jsonRequest, url, jsonResponse))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Failed to connect to server";
+        return Status::STATUS_ERROR;
+    }
+
+    if (!jsonResponse->contains("msg") || !jsonResponse->contains("status"))
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Invalid response from OpenMBU API";
+        return Status::STATUS_ERROR;
+    }
+
+    Status ret = Status::STATUS_UNKNOWN;
+
+    std::string status = (*jsonResponse)["status"];
+    if (status == "success")
+        ret = Status::STATUS_SUCCESS;
+    else if (status == "error")
+        ret = Status::STATUS_ERROR;
+    else if (status == "fail")
+        ret = Status::STATUS_FAILURE;
+
+    if (statusMsg != nullptr)
+    {
+        if (jsonResponse->contains("msg"))
+            *statusMsg = (*jsonResponse)["msg"];
+        else
+            *statusMsg = "";
+    }
+
+    return ret;
 }

@@ -6,14 +6,16 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_library(${PROJECT_NAME} SHARED "")
 target_sources(${PROJECT_NAME}
-    PUBLIC ${CMAKE_SOURCE_DIR}/include/openmbu_webapi/account.hpp
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/include/openmbu_webapi/account.hpp
+        ${CMAKE_SOURCE_DIR}/include/openmbu_webapi/status.hpp
     PRIVATE
-    # Sources
-    account.cpp
-    util.cpp
+        # Sources
+        account.cpp
+        util.cpp
 
-    # Headers
-    util.hpp
+        # Headers
+        util.hpp
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC MBUAUTH_DLL)

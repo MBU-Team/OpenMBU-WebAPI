@@ -1,5 +1,7 @@
 #pragma once
 
+#include <openmbu_webapi/status.hpp>
+
 #include <string>
 
 #ifdef MBUAUTH_DLL
@@ -14,13 +16,6 @@
 
 namespace OpenMBUWebAPI
 {
-    enum class Status
-    {
-        STATUS_SUCCESS = 0,
-        STATUS_FAILURE,
-        STATUS_ERROR,
-        STATUS_UNKNOWN,
-    };
 
     class MBUAUTH_EXPORT Account
     {
