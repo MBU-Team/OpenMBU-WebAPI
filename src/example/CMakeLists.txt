@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(OpenMBUAuthExample)
+project(OpenMBUWebAPIExample)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -13,7 +13,7 @@ target_sources(${PROJECT_NAME}
 
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenMBUAuth)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenMBUWebAPI)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${ProjectOutDir}")
 set_property(TARGET ${PROJECT_NAME} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${ProjectOutDir}")

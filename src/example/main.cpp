@@ -1,13 +1,13 @@
 #include <iostream>
-#include <mbu_auth/auth.hpp>
+#include <openmbu_webapi/account.hpp>
 
 int main()
 {
     std::string statusMsg;
-    MBUAccount account;
+    OpenMBUWebAPI::MBUAccount account;
     std::cout << "=== Logging In ===" << std::endl;
-    MBUAuthStatus status = account.Login("tester", "tester", &statusMsg);
-    if (status == MBUAuthStatus::MBU_AUTH_SUCCESS)
+    OpenMBUWebAPI::MBUAuthStatus status = account.Login("tester", "tester", &statusMsg);
+    if (status == OpenMBUWebAPI::MBUAuthStatus::MBU_AUTH_SUCCESS)
     {
         std::cout << "Logged in successfully!" << std::endl;
         std::cout << "User Name: " << account.GetUsername() << std::endl;
@@ -18,7 +18,7 @@ int main()
 
         std::cout << "=== Checking Session ===" << std::endl;
         status = account.CheckSession(&statusMsg);
-        if (status == MBUAuthStatus::MBU_AUTH_SUCCESS)
+        if (status == OpenMBUWebAPI::MBUAuthStatus::MBU_AUTH_SUCCESS)
         {
             std::cout << "Session is valid!" << std::endl;
             std::cout << "Display Name: " << account.GetDisplayName() << std::endl;
@@ -27,7 +27,7 @@ int main()
 
             std::cout << "=== Logging Out ===" << std::endl;
             status = account.Logout(&statusMsg);
-            if (status == MBUAuthStatus::MBU_AUTH_SUCCESS)
+            if (status == OpenMBUWebAPI::MBUAuthStatus::MBU_AUTH_SUCCESS)
             {
                 std::cout << "Logged out successfully!" << std::endl;
                 std::cout << "Status Message: " << statusMsg << std::endl;

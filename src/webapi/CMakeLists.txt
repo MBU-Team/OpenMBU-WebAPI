@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(OpenMBUAuth)
+project(OpenMBUWebAPI)
 
 set(CMAKE_CXX_STANDARD 14)
 
 add_library(${PROJECT_NAME} SHARED "")
 target_sources(${PROJECT_NAME}
-    PUBLIC ${CMAKE_SOURCE_DIR}/include/mbu_auth/auth.hpp
+    PUBLIC ${CMAKE_SOURCE_DIR}/include/openmbu_webapi/account.hpp
     PRIVATE
     # Sources
-    auth.cpp
+    account.cpp
     util.cpp
 
     # Headers

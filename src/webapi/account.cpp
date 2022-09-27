@@ -1,7 +1,9 @@
-#include "mbu_auth/auth.hpp"
+#include "openmbu_webapi/account.hpp"
 
 #include "util.hpp"
 #include <nlohmann/json.hpp>
+
+using namespace OpenMBUWebAPI;
 
 bool login(std::string username, std::string password, nlohmann::json *json)
 {
