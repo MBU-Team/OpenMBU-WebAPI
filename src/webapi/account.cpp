@@ -57,7 +57,7 @@ Status Account::LoginSession(const std::string& token, std::string* statusMsg)
 
     nlohmann::json check_session_response {};
     nlohmann::json jsonRequest;
-    jsonRequest["game_token"] = this->mGameToken;
+    jsonRequest["game_token"] = token;
     Status ret = postJSONAndValidate(jsonRequest, "https://api.openmbu.com/check_session.php", &check_session_response, statusMsg);
     if (ret != Status::STATUS_SUCCESS)
         return ret;
