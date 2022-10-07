@@ -21,11 +21,11 @@ target_sources(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME} PUBLIC MBUAUTH_DLL)
 target_compile_definitions(${PROJECT_NAME} PRIVATE MBUAUTH_BUILD)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}../../../include)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/libcurl/include)
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/libs/libcurl/lib)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}../../../libs/libcurl/include)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}../../../libs/libcurl/lib)
 target_compile_definitions(${PROJECT_NAME} PRIVATE CURL_STATICLIB)
 
 if (CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
