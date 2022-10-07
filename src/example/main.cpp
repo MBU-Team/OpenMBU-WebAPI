@@ -10,7 +10,7 @@ int main()
     if (status == OpenMBUWebAPI::Status::STATUS_SUCCESS)
     {
         std::cout << "Logged in successfully!" << std::endl;
-        std::cout << "User Name: " << account.GetUsername() << std::endl;
+        //std::cout << "User Name: " << account.GetUsername() << std::endl;
         std::cout << "Display Name: " << account.GetDisplayName() << std::endl;
         std::cout << "Game Token: " << account.GetGameToken() << std::endl;
         std::cout << "Status Message: " << statusMsg << std::endl;

@@ -7,7 +7,6 @@ using namespace OpenMBUWebAPI;
 
 Account::Account()
 {
-    this->mUsername = "";
     this->mDisplayName = "";
     this->mGameToken = "";
     this->mIsLoggedIn = false;
@@ -40,9 +39,32 @@ Status Account::Login(const std::string& username, const std::string& password, 
         return Status::STATUS_ERROR;
     }
 
-    this->mUsername = username;
     this->mGameToken = login_response["game_token"];
     this->mDisplayName = login_response["game_display_name"];
+    this->mIsLoggedIn = true;
+
+    return ret;
+}
+
+Status Account::LoginSession(const std::string& token, std::string* statusMsg)
+{
+    if (this->mIsLoggedIn)
+    {
+        if (statusMsg != nullptr)
+            *statusMsg = "Already logged in";
+        return Status::STATUS_SUCCESS;
+    }
+
+    nlohmann::json check_session_response {};
+    nlohmann::json jsonRequest;
+    jsonRequest["game_token"] = this->mGameToken;
+    Status ret = postJSONAndValidate(jsonRequest, "https://api.openmbu.com/check_session.php", &check_session_response, statusMsg);
+    if (ret != Status::STATUS_SUCCESS)
+        return ret;
+
+    if (check_session_response.contains("game_display_name"))
+        this->mDisplayName = check_session_response["game_display_name"];
+
     this->mIsLoggedIn = true;
 
     return ret;

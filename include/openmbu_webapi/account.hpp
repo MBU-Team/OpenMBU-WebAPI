@@ -24,16 +24,15 @@ namespace OpenMBUWebAPI
         ~Account();
 
         Status Login(const std::string &username, const std::string &password, std::string *statusMsg = nullptr);
+        Status LoginSession(const std::string &token, std::string *statusMsg = nullptr);
         Status CheckSession(std::string *statusMsg = nullptr);
         Status Logout(std::string *statusMsg = nullptr);
 
-        const std::string &GetUsername() const { return mUsername; }
         const std::string &GetDisplayName() const { return mDisplayName; }
         const std::string &GetGameToken() const { return mGameToken; }
         const bool &IsLoggedIn() const { return mIsLoggedIn; }
 
     private:
-        std::string mUsername;
         std::string mDisplayName;
         std::string mGameToken;
         bool mIsLoggedIn;
