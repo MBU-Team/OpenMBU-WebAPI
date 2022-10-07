@@ -65,9 +65,7 @@ Status Account::LoginSession(const std::string& token, std::string* statusMsg)
     if (check_session_response.contains("game_display_name"))
         this->mDisplayName = check_session_response["game_display_name"];
 
-    if (check_session_response.contains("game_token"))
-        this->mGameToken = check_session_response["game_token"];
-
+    this->mGameToken = token;
     this->mIsLoggedIn = true;
 
     return ret;
