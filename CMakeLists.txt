@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(libs/json)
 
-set(ProjectOutDir "${CMAKE_SOURCE_DIR}/run")
+if (NOT DEFINED ProjectOutDir)
+    set(ProjectOutDir "${CMAKE_SOURCE_DIR}/run")
+endif()
 
 add_subdirectory(src)
